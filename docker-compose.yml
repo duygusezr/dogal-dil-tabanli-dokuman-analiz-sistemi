@@ -1,10 +1,11 @@
 services:
   # 1. LLM Sunucusu (Resmi llama.cpp imajı)
   llm-server:
-    image: ghcr.io/ggerganov/llama.cpp:server-cuda
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
     container_name: tr_llm_server
     ports:
       - "8080:8080"
+    volumes:
       # Proje içindeki models klasörünü container içine bağla (Docker için taşınabilir yol)
       - ./models:/models
     # GPU Desteği için (NVIDIA Container Toolkit gerekli)
