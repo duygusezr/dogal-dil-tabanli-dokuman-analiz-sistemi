@@ -1,0 +1,16 @@
+# Web Arayüzü
+gradio
+
+# PDF İşleme
+pymupdf
+
+# LLM İstemcisi
+openai
+
+# OCR (Optik Karakter Tanıma)
+pytesseract
+Pillow
+
+# Vektör Veritabanı ve Embedding
+chromadb
+fastembed
