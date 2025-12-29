@@ -11,7 +11,20 @@ Bu proje **tamamen taşınabilir** yapıdadır. Model dosyası dahil her şey pa
 
 ## 🚀 Çalıştırma Adımları
 
-Proje klasörü ihtiyacınız olan her şeyi içerir. Model dosyası `models/turkish/` dizininde hazırdır.
+Proje klasörü kodları içerir.
+
+> ⚠️ **ÖNEMLİ: GitHub'dan İndirenler İçin**
+>
+> Yapay Zeka modeli (~4.5GB) dosya boyutu nedeniyle GitHub'da yüklü değildir. Projeyi indirdikten sonra modeli manuel olarak eklemelisiniz:
+>
+> 1. Modeli indirin: [Buraya Tıklayın (HuggingFace)](https://huggingface.co/matrixportalx/Turkish-Llama-8b-Instruct-v0.1-GGUF/resolve/main/Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf?download=true)
+> 2. İndirdiğiniz dosyanın adının tam olarak şu olduğundan emin olun:  
+>     `Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf`
+> 3. Dosyayı şuraya taşıyın:
+>     `models/turkish/`
+>
+> Eğer bu klasörler yoksa oluşturun. Sonuç şöyle görünmeli:
+> `Proje/models/turkish/Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf`
 
 ### Kolay Başlatma (Windows)
 

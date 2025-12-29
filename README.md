@@ -7,10 +7,18 @@ Bu proje, **Turkish-Llama-8b** modeli kullanarak Türkçe PDF dokümanları üze
 
 ## 📁 Paket İçeriği
 
-- **Model**: Turkish-Llama-8b-Instruct-v0.1 (~5GB)
+- **Model**: Turkish-Llama-8b-Instruct-v0.1 (~5GB) *(⚠️ GitHub sürümüne dahil değildir, ayrıca indirilmelidir)*
 - **Uygulama**: Web Arayüzü (Gradio)
 - **Veritabanı**: Vektör DB (ChromaDB)
 - **Araçlar**: OCR (Tesseract), PDF Okuyucu
+
+## ⚠️ Önemli: Model Kurulumu
+
+GitHub'dan indirenler için model dosyası dahil değildir. Kuruluma başlamadan önce:
+
+1. [Modeli İndir (HuggingFace)](https://huggingface.co/matrixportalx/Turkish-Llama-8b-Instruct-v0.1-GGUF/resolve/main/Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf?download=true)
+2. `models/turkish/` klasörü oluşturup içine atın.
+3. Dosya adının `Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf` olduğundan emin olun.
 
 ## 🚀 Nasıl Çalıştırılır?
 
