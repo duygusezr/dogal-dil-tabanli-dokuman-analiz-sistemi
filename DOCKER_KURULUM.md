@@ -60,13 +60,42 @@ Proje Klasörü/
 └── ... (Yardımcı scriptler)
 ```
 
+## 🔄 Sistemi Durdurma
+
+Sistemi kapatmak için:
+
+**Windows:**
+
+```powershell
+docker_durdur.ps1
+```
+
+**Terminal (Evrensel):**
+
+```bash
+docker-compose down
+```
+
+---
+
 ## ❓ Sıkça Sorulan Sorular
 
+**Soru: Python kurmam gerekiyor mu?**
+**Cevap:** Hayır! Docker kullanıyorsanız sadece Docker Desktop yeterlidir. Python, Tesseract ve tüm bağımlılıklar container içinde hazır gelir.
+
 **Soru: Modeli indirmem gerekiyor mu?**
-**Cevap:** Hayır, model dosyası proje klasörüne dahil edilmiştir.
+**Cevap:** Evet, GitHub'dan indirdiyseniz. Model dosyası (~4.5GB) boyut sınırı nedeniyle GitHub'a yüklenmemiştir. Yukarıdaki "ÖNEMLİ" bölümünden indirin.
 
 **Soru: Başka bilgisayara nasıl taşırım?**
-**Cevap:** Tüm proje klasörünü (USB bellek, ZIP vb. ile) kopyalamanız yeterlidir.
+**Cevap:**
+
+1. Modeli indirip `models/turkish/` klasörüne koyun
+2. Tüm proje klasörünü kopyalayın (USB, ZIP vb.)
+3. Hedef bilgisayarda Docker Desktop'ı çalıştırın
+4. `docker_baslat.ps1` veya `docker-compose up` komutunu çalıştırın
 
 **Soru: GPU'm yoksa ne olur?**
-**Cevap:** Sistem otomatik olarak CPU moduna geçer, ancak cevap verme süresi uzayabilir.
+**Cevap:** Sistem otomatik olarak CPU moduna geçer, ancak cevap verme süresi uzayabilir (GPU: ~2sn, CPU: ~30sn).
+
+**Soru: İlk çalıştırmada neden yavaş?**
+**Cevap:** Docker, gerekli imajları (llama.cpp, Python vb.) internetten indiriyor. İlk kurulum 5-10 dakika sürebilir. Sonraki çalıştırmalar anlık olacaktır.
