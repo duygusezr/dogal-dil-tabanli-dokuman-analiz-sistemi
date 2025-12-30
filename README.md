@@ -2,7 +2,7 @@
 
 Bu proje, yerel olarak çalışan yapay zeka destekli bir doküman analiz sistemidir. Türkçe PDF dokümanlarını okur, içeriğini anlar ve sorduğunuz sorulara doküman içeriğine sadık kalarak cevap verir.
 
-**Öne Çıkan Özellikler:**
+## Öne Çıkan Özellikler
 
 - **🔒 %100 Gizlilik:** İnternet gerektirmez, verileriniz bilgisayarınızdan dışarı çıkmaz.
 - **🐳 Tam Taşınabilir (Docker):** Python, CUDA vs. kurmakla uğraşmazsınız. Tek komutla çalışır.
@@ -40,7 +40,7 @@ Sadece şu komutu çalıştırın:
 docker-compose up --build
 ```
 
-*(İlk çalıştırmada gerekli dosyaları indireceği için 5-10 dakika sürebilir. Sonrakilerde hemen açılır.)*
+> *(İlk çalıştırmada gerekli dosyaları indireceği için 5-10 dakika sürebilir. Sonrakilerde hemen açılır.)*
 
 ---
 
@@ -54,7 +54,7 @@ Sistem açıldığında terminalde loglar akmaya başlar.
 3. **"📥 PDF’yi İndeksle"** butonuna basın. (Log ekranında "İndeksleme Tamam" yazısını bekleyin).
 4. Aşağıdaki sohbet kutusuna sorunuzu yazın.
 
-**Örnek Sorular:**
+### Örnek Sorular
 
 - "Bu belgenin ana fikri nedir?"
 - "Sözleşmedeki ceza koşulları nelerdir?"
