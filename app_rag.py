@@ -28,7 +28,7 @@ EMBED_MODEL = "BAAI/bge-small-en-v1.5"   # alternatif: "BAAI/bge-small-en-v1.5" 
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 150
 TOP_K = 6
-MAX_ANSWER_TOKENS = 700
+MAX_ANSWER_TOKENS = 2000
 PERSIST_DIR = "./rag_store"
 COLLECTION_NAME = "pdf_chunks"
 
@@ -114,8 +114,13 @@ def clear_index():
     return "İndeks temizlendi."
 
 SYSTEM_RAG = (
-    "Türkçe cevap ver. Sadece verilen bağlamı kullan; bağlamda yoksa 'Bağlamda yok' de. "
-    "Kaynaklardan emin olmadığın bilgileri uydurma."
+    "Sen, doküman analizi yapan profesyonel bir asistansın. "
+    "Sadece GÖREV: Aşağıda verilen 'BAĞLAM' bilgisini kullanarak soruyu cevaplamaktır. "
+    "KURALLAR:\n"
+    "1. Asla bağlam dışındaki kendi genel kültür bilgini kullanma.\n"
+    "2. Eğer sorunun cevabı bağlamda açıkça yoksa, 'Bu bilgi dokümanda yer almıyor.' de ve dur.\n"
+    "3. Cevabın doğruluğundan emin değilsen uydurma.\n"
+    "4. Cevabı Türkçe ver."
 )
 
 def retrieve(question):
@@ -137,7 +142,7 @@ def ask(question, history):
 
     msgs = [
         {"role":"system","content": SYSTEM_RAG},
-        {"role":"user","content": f"BAĞLAM:\n{ctx_text}\n\nSORU:\n{question}"}
+        {"role":"user","content": f"BAĞLAM:\n----------------\n{ctx_text}\n----------------\n\nBu bağlama göre şu soruyu cevapla:\nSORU: {question}"}
     ]
 
     # Akışlı yanıt
@@ -223,4 +228,4 @@ with gr.Blocks(title="Doğal Dil Tabanlı Doküman Analiz Sistemi") as demo:
     summary_out = gr.Textbox(label="Özet", lines=8)
     sum_btn.click(fn=summarize_last, inputs=n_sent, outputs=summary_out)
 
-demo.launch(server_name="127.0.0.1", server_port=7861)
+demo.launch(server_name="0.0.0.0", server_port=7861)

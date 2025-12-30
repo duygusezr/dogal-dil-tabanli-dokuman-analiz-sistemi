@@ -14,3 +14,4 @@ Pillow
 # Vektör Veritabanı ve Embedding
 chromadb
 fastembed
+                                                                         
