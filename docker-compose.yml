@@ -28,6 +28,7 @@ services:
     environment:
       - LLM_API_URL=http://llm-server:8080/v1
       - TESSERACT_CMD=tesseract
+      - GRADIO_SERVER_NAME=0.0.0.0
     volumes:
       # Veritabanının kalıcı olması için bağla
       - ./rag_store:/app/rag_store

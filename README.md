@@ -1,75 +1,86 @@
-# 🤖 Türkçe LLM + RAG Doküman Analiz Sistemi
+# 🤖 Doğal Dil Tabanlı Doküman Analiz Sistemi
 
-Bu proje, yerel olarak çalışan yapay zeka destekli bir doküman analiz sistemidir. Türkçe PDF dokümanlarını okur, içeriğini anlar ve sorduğunuz sorulara doküman içeriğine sadık kalarak cevap verir.
+Bu proje, yerel olarak çalışan (Local RAG) yapay zeka destekli bir doküman analiz sistemidir. Türkçe PDF dokümanlarını okur, OCR ile metne dönüştürür, vektörel olarak indeksler ve sorduğunuz sorulara doküman içeriğine sadık kalarak cevap verir.
 
-## Öne Çıkan Özellikler
+Arayüz **Gradio**, vektör veritabanı **ChromaDB**, embedding modeli **FastEmbed (BAAI/bge)** ve OCR motoru **Tesseract** üzerine kuruludur.
 
-- **🔒 %100 Gizlilik:** İnternet gerektirmez, verileriniz bilgisayarınızdan dışarı çıkmaz.
-- **🐳 Tam Taşınabilir (Docker):** Python, CUDA vs. kurmakla uğraşmazsınız. Tek komutla çalışır.
-- **📄 OCR Desteği:** Resim formatındaki (taranmış) PDF'leri de okuyabilir.
-- **🧠 Akıllı RAG:** Büyük dokümanları parçalar, sadece ilgili kısımları kullanarak cevap üretir.
+## ⭐ Öne Çıkan Özellikler
+
+- **📄 Gelişmiş PDF İşleme:** Metin içeren PDF'lerin yanı sıra, taranmış (resim formatındaki) PDF'leri de **OCR (Tesseract)** ile okuyabilir.
+- **🧠 Akıllı RAG (Retrieval-Augmented Generation):** Dokümanları anlamsal parçalara böler ve sorunuzla en alakalı kısımları bularak cevap üretir.
+- **🔍 Debug Modu:** Modelin cevabı üretirken hangi kaynakları kullandığını, benzerlik skorlarını ve metin parçalarını detaylıca görebilirsiniz.
+- **📝 Otomatik Özetleme:** Belgenin içeriğini belirlediğiniz madde sayısına göre otomatik olarak özetleyebilir.
+- **🔒 %100 Gizlilik:** İnternet gerektirmez, verileriniz tamamen yerel makinenizde işlenir.
 
 ---
 
 ## 🛠️ Gereksinimler
 
-1. **Docker Desktop** (Yüklü ve çalışıyor olmalı)
-2. **(İsteğe Bağlı) NVIDIA Ekran Kartı:** Cevapların hızlı üretilmesi için önerilir. Yoksa işlemci (CPU) kullanılır.
+Projenin çalışması için aşağıdakiler gereklidir:
+
+1. **Python 3.8+**
+2. **Tesseract OCR:** (Windows için `tesseract.exe`)
+3. **Yerel LLM Sunucusu:** (Örn: Llama.cpp server, Ollama vb. - OpenAI uyumlu bir API sağlamalıdır)
 
 ---
 
-## 🚀 Kurulum (Adım Adım)
+## 🚀 Kurulum
 
-### Adım 1: Modeli İndirin
+### 1. Kütüphaneleri Yükleyin
 
-GitHub dosya boyutu sınırı nedeniyle AI modeli projeye dahil değildir. Modeli bir kez indirip yerine koymanız gerekir.
+Gerekli Python paketlerini yüklemek için proje dizininde şu komutu çalıştırın:
 
-1. Modeli şu linkten indirin (~4.5 GB):
-    👉 [**Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf**](https://huggingface.co/matrixportalx/Turkish-Llama-8b-Instruct-v0.1-GGUF/resolve/main/Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf?download=true)
-2. İndirdiğiniz dosyayı proje içindeki şu yola koyun:
-    `models/Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf`
-
-> **Not:** `models` klasörü yoksa oluşturun. Klasör yapısı tam olarak şöyle olmalı:
-> `Proje -> models -> Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf`
-
-### Adım 2: Sistemi Başlatın
-
-Sadece şu komutu çalıştırın:
-
-```powershell
-docker-compose up --build
+```bash
+pip install -r requirements.txt
 ```
 
-> *(İlk çalıştırmada gerekli dosyaları indireceği için 5-10 dakika sürebilir. Sonrakilerde hemen açılır.)*
+### 2. Tesseract OCR Kurulumu
+
+Windows kullanıyorsanız, [Tesseract installer](https://github.com/UB-Mannheim/tesseract/wiki) indirip kurun. Varsayılan yol: `C:\Program Files\Tesseract-OCR\tesseract.exe`.
+Farklı bir yola kurduysanız, çevre değişkeni veya `.env` ayarı yapmanız gerekir.
+
+### 3. LLM Sunucusunu Başlatın
+
+Uygulama varsayılan olarak `http://127.0.0.1:8080/v1` adresindeki yerel bir LLM sunucusuna bağlanır (Llama.cpp server gibi). Sunucunuzu başlatın.
+
+**Örnek Llama.cpp Başlatma:**
+
+```bash
+./server.exe -m models/Turkish-Llama-8b-Instruct-v0.1.Q4_K_S.gguf -c 2048 --host 0.0.0.0 --port 8080
+```
 
 ---
 
 ## 🖥️ Kullanım
 
-Sistem açıldığında terminalde loglar akmaya başlar.
+Uygulamayı başlatmak için:
 
-1. Tarayıcınızı açın ve şu adrese gidin:
-    👉 **<http://localhost:7861>**
-2. **"PDF Yükle"** butonuna basarak bir doküman seçin.
-3. **"📥 PDF’yi İndeksle"** butonuna basın. (Log ekranında "İndeksleme Tamam" yazısını bekleyin).
-4. Aşağıdaki sohbet kutusuna sorunuzu yazın.
+```bash
+python app_rag.py
+```
 
-### Örnek Sorular
+Uygulama açıldığında tarayıcınızdan **`http://localhost:7861`** adresine gidin.
 
-- "Bu belgenin ana fikri nedir?"
-- "Sözleşmedeki ceza koşulları nelerdir?"
-- "Rapora göre 2023 yılı kârı ne kadar?"
+### Adım Adım Kullanım
 
-> **İpucu:** Cevapların uzunluğu veya kısalığı için "Özet Madde Sayısı" ayarını kullanabilirsiniz.
+1. **Dosya Yükleme:** "📁 PDF Dosyası Yükle" bölümünden PDF belgenizi seçin.
+2. **İndeksleme:** "📥 PDF'yi İndeksle" butonuna basın. (Sistem belgeyi okuyacak, gerekirse OCR yapacak ve embeddingleri oluşturacaktır).
+3. **Soru Sorma:**
+    - **Normal Mod:** Doğrudan sorunuzu sorun ve cevabı alın.
+    - **Debug Mod:** "🔍 Debug Mod" sekmesine geçerek, cevabın hangi kaynaktan geldiğini ve benzerlik skorlarını görebilirsiniz.
+4. **Özetleme:** Sayfanın altındaki "📝 Belge Özeti" bölümünden madde sayısını seçip "Özet Oluştur" diyerek belgenin hızlı bir özetini alabilirsiniz.
 
 ---
 
-## ❓ Sorun Giderme
+## ⚙️ Yapılandırma (Environment Variables)
 
-- **"docker-compose command not found" hatası:** Docker Desktop'ın kurulu olduğundan emin olun.
-- **Web sitesi açılmıyor:** Terminalde `Running on local URL:  http://0.0.0.0:7861` yazısını görene kadar bekleyin.
-- **Sistemi kapatmak için:** Terminal ekranında `Ctrl + C` tuşlarına basın.
-- **Sistemi sıfırlamak için:** İndekslenen belgeleri temizlemek isterseniz `rag_store` klasörünü silebilirsiniz veya arayüzden "İndeksi Temizle" diyebilirsiniz.
+Uygulama, sistem çevre değişkenlerini (Environment Variables) kullanarak yapılandırılabilir:
+
+| Değişken | Varsayılan Değer | Açıklama |
+| :--- | :--- | :--- |
+| `LLM_API_URL` | `http://127.0.0.1:8080/v1` | Yerel LLM sunucusunun API adresi. |
+| `TESSERACT_CMD` | `C:\Program Files\Tesseract-OCR\tesseract.exe` | Tesseract OCR çalıştırılabilir dosya yolu. |
+| `GRADIO_SERVER_NAME` | `127.0.0.1` | Arayüzün yayınlanacağı IP adresi. |
 
 ---
 
@@ -77,11 +88,9 @@ Sistem açıldığında terminalde loglar akmaya başlar.
 
 ```text
 Proje/
-├── models/             # İndirdiğiniz AI Modeli (GGUF)
-├── rag_store/          # Vektör veritabanı (Otomatik oluşur)
-├── app_rag.py          # Python uygulama kodu
-├── docker-compose.yml  # Servis ayarları
-├── Dockerfile          # Web arayüzü imaj ayarları
-├── requirements.txt    # Kütüphane listesi
-└── README.md           # Bu dosya
+├── rag_store/          # Vektör veritabanı (Otomatik oluşur - ChromaDB)
+├── app_rag.py          # Ana uygulama kodu (Gradio + RAG mantığı)
+├── requirements.txt    # Gerekli Python kütüphaneleri
+├── README.md           # Dokümantasyon
+└── .gitignore          # Git tarafından yok sayılacak dosyalar
 ```
