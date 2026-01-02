@@ -1,4 +1,4 @@
-import os, gradio as gr, fitz, re
+import os, gradio as gr, fitz, re, time, csv, datetime
 from openai import OpenAI
 import pytesseract
 from PIL import Image, ImageEnhance
@@ -21,12 +21,12 @@ EMBED_MODEL = "BAAI/bge-small-en-v1.5"  # ✅ FastEmbed tarafından destekleniyo
 # "sentence-transformers/all-MiniLM-L6-v2" - Daha hızlı
 # "BAAI/bge-base-en-v1.5" - Daha güçlü ama yavaş
 
-# Optimize edilmiş parametreler
+# Optimize edilmiş parametreler - 🔥 OCR için GEVŞEK ayarlar
 CHUNK_SIZE = 600  # Daha küçük = daha spesifik eşleşme
-CHUNK_OVERLAP = 150  # Yüksek overlap = daha iyi bağlam
+CHUNK_OVERLAP = 250  # 🔥 Artırıldı: Daha fazla overlap = daha iyi bağlam
 TOP_K = 8  # DAHA FAZLA kaynak = daha iyi şans
-MAX_ANSWER_TOKENS = 600
-SIMILARITY_THRESHOLD = 0.40  # Daha düşük = daha gevşek (OCR için gerekli)
+MAX_ANSWER_TOKENS = 2000
+SIMILARITY_THRESHOLD = 0.35  # 🔥 DÜŞÜRÜLDÜ: OCR hatalarına toleranslı (0.40 → 0.35)
 
 PERSIST_DIR = "./rag_store"
 COLLECTION_NAME = "pdf_chunks"
@@ -210,6 +210,9 @@ def index_pdf(file):
         ids = [f"{os.path.basename(file.name)}::{i}" for i in range(len(chunks))]
         embs = list(embedder.embed(chunks))
         
+        # Zaman damgası ekle
+        current_time = time.time()
+        
         # ChromaDB'ye ekle
         col.add(
             ids=ids,
@@ -218,7 +221,8 @@ def index_pdf(file):
             metadatas=[{
                 "source": os.path.basename(file.name), 
                 "chunk": i,
-                "length": len(chunks[i])
+                "length": len(chunks[i]),
+                "timestamp": current_time
             } for i in range(len(chunks))]
         )
         
@@ -239,14 +243,103 @@ Artık soru sorabilirsiniz! 💬"""
         return f"❌ Hata oluştu: {str(e)}"
 
 def clear_index():
-    """İndeksi temizle"""
+    """Son yüklenen PDF'yi sil (Zaman damgasına göre en son)"""
     global col
     try:
-        db.delete_collection(COLLECTION_NAME)
-        col = db.create_collection(COLLECTION_NAME, metadata={"hnsw:space": "cosine"})
-        return "🧹 İndeks tamamen temizlendi."
+        all_data = col.get(include=["metadatas"])
+        
+        if not all_data or not all_data["metadatas"]:
+            return "⚠️ Silinecek belge yok."
+        
+        # Dosyaları ve zaman damgalarını topla
+        file_timestamps = {}
+        source_ids = {}
+        
+        for i, meta in enumerate(all_data["metadatas"]):
+            source = meta.get("source", "unknown")
+            timestamp = meta.get("timestamp", 0)
+            
+            # ID'leri kaydet
+            if source not in source_ids:
+                source_ids[source] = []
+            source_ids[source].append(all_data["ids"][i])
+            
+            # En güncel timestamp'i bul
+            if source not in file_timestamps:
+                file_timestamps[source] = timestamp
+            else:
+                file_timestamps[source] = max(file_timestamps[source], timestamp)
+        
+        if not file_timestamps:
+            return "⚠️ Silinecek belge yok."
+        
+        # En son eklenen dosyayı bul
+        last_source = max(file_timestamps, key=file_timestamps.get)
+        ids_to_delete = source_ids[last_source]
+        
+        # Kalan dosya sayısı
+        remaining_count = len(file_timestamps) - 1
+        
+        # Silme işlemi
+        col.delete(ids=ids_to_delete)
+        
+        return f"""🗑️ Son yüklenen PDF silindi!
+        
+📊 Silinen:
+• Dosya: {last_source}
+• Parça sayısı: {len(ids_to_delete)}
+
+📚 Kalan dosya sayısı: {remaining_count}
+
+💡 Tüm indeksi silmek için "Tüm İndeksi Sil" butonunu kullanın."""
+        
     except Exception as e:
-        return f"❌ Temizleme hatası: {str(e)}"
+        import traceback
+        return f"❌ Temizleme hatası: {str(e)}\n{traceback.format_exc()}"
+
+def clear_all_index():
+    """TÜM indeksi temizle - db.reset() kullanarak"""
+    global col
+    try:
+        # Reset ile veri tabanını sıfırla
+        db.reset()
+        
+        # Koleksiyonu tekrar oluştur
+        col = db.get_or_create_collection(COLLECTION_NAME, metadata={"hnsw:space": "cosine"})
+        
+        return f"""🧹 TÜM İNDEKS VE VERİTABANI SIFIRLANDI!
+        
+⚠️ Bilgi:
+"rag_store" klasörü diskte görünmeye devam edebilir, çünkü uygulama çalıştığı sürece veritabanı bağlantısı aktiftir. 
+Ancak içi tamamen boştur ve tüm veriler silinmiştir.
+
+✅ Veritabanı tertemiz!
+
+🎯 Yeni PDF yükleyebilirsiniz."""
+        
+    except Exception as e:
+        import traceback
+        return f"❌ Temizleme hatası: {str(e)}\n{traceback.format_exc()}"
+
+def log_to_csv(question, answer):
+    """Soru ve cevabı CSV dosyasına kaydeder"""
+    try:
+        if not os.path.exists(PERSIST_DIR):
+            os.makedirs(PERSIST_DIR)
+            
+        log_file = os.path.join(PERSIST_DIR, "chat_history.csv")
+        file_exists = os.path.exists(log_file)
+        
+        with open(log_file, mode='a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(["Zaman", "Soru", "Cevap"])
+            
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            writer.writerow([timestamp, question, answer])
+            print(f"💾 Sohbet kaydedildi: {timestamp}")
+    except Exception as e:
+        print(f"❌ Log hatası: {e}")
 
 def retrieve(question, top_k=TOP_K, show_scores=True):
     """Geliştirilmiş retrieval - skor bazlı filtreleme"""
@@ -365,23 +458,29 @@ CEVAP (Türkçe, bağlama göre):"""
     ]
 
     try:
-        # LLM çağrısı - Dengeli parametreler
+        # 🔥 YENİ: Tekrar önleme parametreleri
         resp = client.chat.completions.create(
             model="local",
             messages=msgs,
-            temperature=0.1,  # Düşük ama çok katı değil
+            temperature=0.1,
             max_tokens=MAX_ANSWER_TOKENS,
             top_p=0.9,
-            frequency_penalty=0.3,
-            presence_penalty=0.1,
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+            stop=["BAĞLAM:", "SORU:", "---"],  # 🔥 Döngü kırıcılar
             stream=True,
         )
         
         partial = ""
+        
         for chunk in resp:
             delta = chunk.choices[0].delta.content or ""
             partial += delta
+            
             yield partial
+            
+        # Yanıt tamamlanınca kaydet
+        log_to_csv(question, partial)
             
     except Exception as e:
         yield f"❌ LLM hatası: {str(e)}"
@@ -423,15 +522,24 @@ def ask_with_debug(question, history):
         resp = client.chat.completions.create(
             model="local",
             messages=msgs,
-            temperature=0.05,
+            temperature=0.1,
             max_tokens=MAX_ANSWER_TOKENS,
+            frequency_penalty=0.0,
+            presence_penalty=0.0,
+            stop=["BAĞLAM:", "---"],
             stream=True,
         )
         
+        full_answer = ""
         for chunk in resp:
             delta = chunk.choices[0].delta.content or ""
             debug_info += delta
+            full_answer += delta
+            
             yield debug_info
+            
+        # Yanıt tamamlanınca kaydet
+        log_to_csv(question, full_answer)
             
     except Exception as e:
         yield debug_info + f"\n\n❌ Hata: {str(e)}"
@@ -502,12 +610,14 @@ with gr.Blocks(title="DOĞAL DİL TABANLI DOKÜMAN ANALİZ SİSTEMİ") as demo:
     
     with gr.Row():
         idx_btn = gr.Button("📥 PDF'yi İndeksle", variant="primary", size="lg")
-        clr_btn = gr.Button("🧹 İndeksi Temizle", variant="secondary")
+        clr_btn = gr.Button("🗑️ Son PDF'i Sil", variant="secondary")
+        clr_all_btn = gr.Button("🧹 Tüm İndeksi Sil", variant="stop")
     
     log = gr.Textbox(label="📊 Durum / İstatistikler", interactive=False, lines=8)
 
     idx_btn.click(fn=index_pdf, inputs=f, outputs=log)
     clr_btn.click(fn=clear_index, inputs=None, outputs=log)
+    clr_all_btn.click(fn=clear_all_index, inputs=None, outputs=log)
 
     gr.Markdown("---")
     gr.Markdown("## 💬 Soru-Cevap")
