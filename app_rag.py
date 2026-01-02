@@ -544,8 +544,8 @@ def ask_with_debug(question, history):
     except Exception as e:
         yield debug_info + f"\n\n❌ Hata: {str(e)}"
 
-def summarize_doc(n_sentences):
-    """Belgeyi özetle"""
+def summarize_doc():
+    """Belgeyi genel olarak özetle"""
     try:
         res = col.get(include=["documents", "metadatas"])
         docs = res.get("documents") or []
@@ -556,24 +556,22 @@ def summarize_doc(n_sentences):
         # Tüm chunk'ları birleştir
         all_text = " ".join(docs) if isinstance(docs, list) else str(docs)
         
-        # Çok uzunsa ilk N chunk'ı al
+        # Çok uzunsa ilk N chunk'ı al (limitli context)
         if len(all_text) > 15000:
             sample_chunks = docs[:10] if isinstance(docs, list) else [all_text[:15000]]
             sample_text = " ".join(sample_chunks) if isinstance(sample_chunks, list) else sample_chunks
         else:
             sample_text = all_text
         
-        n_sent = int(n_sentences)
-        
         msgs = [
-            {"role": "system", "content": "Sen bir özet uzmanısın. Verilen metni net, öz ve madde madde özetle."},
-            {"role": "user", "content": f"""Aşağıdaki belgeyi {n_sent} ana madde ile özetle.
-Her madde 1-2 cümle olsun, Türkçe yaz.
+            {"role": "system", "content": "Sen bir uzman doküman analistisin. Verilen metnin genel ve kapsamlı bir özetini çıkar."},
+            {"role": "user", "content": f"""Aşağıdaki belgenin içeriğini, ana konusunu ve önemli noktalarını kapsayan genel bir özet yaz.
+Anlaşılır paragraflar halinde, akıcı bir Türkçe kullan.
 
-BELGENİN METNİ:
+BELGENİN METNİ (Kısmi):
 {sample_text}
 
-ÖZET ({n_sent} madde):"""}
+GENEL ÖZET:"""}
         ]
         
         r = client.chat.completions.create(
@@ -645,11 +643,10 @@ with gr.Blocks(title="DOĞAL DİL TABANLI DOKÜMAN ANALİZ SİSTEMİ") as demo:
     gr.Markdown("## 📝 Belge Özeti")
     
     with gr.Row():
-        n_sent = gr.Slider(3, 10, value=5, step=1, label="Özet Madde Sayısı")
-        sum_btn = gr.Button("📝 Özet Oluştur", variant="primary")
+        sum_btn = gr.Button("📝 Genel Özet Oluştur", variant="primary")
     
     summary_out = gr.Textbox(label="Özet Sonucu", lines=10)
-    sum_btn.click(fn=summarize_doc, inputs=n_sent, outputs=summary_out)
+    sum_btn.click(fn=summarize_doc, inputs=None, outputs=summary_out)
     
     gr.Markdown("""
     ---
