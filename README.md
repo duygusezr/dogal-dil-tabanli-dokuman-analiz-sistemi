@@ -11,6 +11,8 @@ Arayüz **Gradio**, vektör veritabanı **ChromaDB**, embedding modeli **FastEmb
 - **🔍 Debug Modu:** Modelin cevabı üretirken hangi kaynakları kullandığını, benzerlik skorlarını ve metin parçalarını detaylıca görebilirsiniz.
 - **📝 Otomatik Özetleme:** Belgenin içeriğini belirlediğiniz madde sayısına göre otomatik olarak özetleyebilir.
 - **🔒 %100 Gizlilik:** İnternet gerektirmez, verileriniz tamamen yerel makinenizde işlenir.
+- **🗑️ Veri Yönetimi:** İndekslenen belgeleri tek tek (son yüklenen) veya topluca silebilirsiniz.
+- **💾 Sohbet Günlüğü:** Tüm soru ve cevaplarınız `chat_history.csv` dosyasında tarihçeli olarak tutulur.
 
 ---
 
@@ -69,6 +71,9 @@ Uygulama açıldığında tarayıcınızdan **`http://localhost:7861`** adresine
     - **Normal Mod:** Doğrudan sorunuzu sorun ve cevabı alın.
     - **Debug Mod:** "🔍 Debug Mod" sekmesine geçerek, cevabın hangi kaynaktan geldiğini ve benzerlik skorlarını görebilirsiniz.
 4. **Özetleme:** Sayfanın altındaki "📝 Belge Özeti" bölümünden madde sayısını seçip "Özet Oluştur" diyerek belgenin hızlı bir özetini alabilirsiniz.
+5. **İndeks Yönetimi:**
+    - **Son PDF'i Sil:** "🗑️ Son PDF'i Sil" butonu ile en son eklediğiniz belgeyi veritabanından kaldırabilirsiniz.
+    - **Tüm İndeksi Sil:** "🧹 Tüm İndeksi Sil" butonu ile tüm veritabanını sıfırlayabilirsiniz.
 
 ---
 
@@ -89,6 +94,7 @@ Uygulama, sistem çevre değişkenlerini (Environment Variables) kullanarak yap�
 ```text
 Proje/
 ├── rag_store/          # Vektör veritabanı (Otomatik oluşur - ChromaDB)
+│   └── chat_history.csv # Sohbet geçmişi günlüğü
 ├── app_rag.py          # Ana uygulama kodu (Gradio + RAG mantığı)
 ├── requirements.txt    # Gerekli Python kütüphaneleri
 ├── README.md           # Dokümantasyon
