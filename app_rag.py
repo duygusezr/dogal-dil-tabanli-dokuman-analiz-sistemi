@@ -462,11 +462,11 @@ CEVAP (Türkçe, bağlama göre):"""
         resp = client.chat.completions.create(
             model="local",
             messages=msgs,
-            temperature=0.1,
+            temperature=0.3,
             max_tokens=MAX_ANSWER_TOKENS,
             top_p=0.9,
-            frequency_penalty=0.0,
-            presence_penalty=0.0,
+            frequency_penalty=0.6,
+            presence_penalty=0.6,
             stop=["BAĞLAM:", "SORU:", "---"],  # 🔥 Döngü kırıcılar
             stream=True,
         )
@@ -522,10 +522,10 @@ def ask_with_debug(question, history):
         resp = client.chat.completions.create(
             model="local",
             messages=msgs,
-            temperature=0.1,
+            temperature=0.3,
             max_tokens=MAX_ANSWER_TOKENS,
-            frequency_penalty=0.0,
-            presence_penalty=0.0,
+            frequency_penalty=0.6,
+            presence_penalty=0.6,
             stop=["BAĞLAM:", "---"],
             stream=True,
         )
@@ -577,8 +577,9 @@ GENEL ÖZET:"""}
         r = client.chat.completions.create(
             model="local", 
             messages=msgs, 
-            temperature=0.2, 
+            temperature=0.3, 
             max_tokens=MAX_ANSWER_TOKENS,
+            frequency_penalty=0.5,
             stream=False
         )
         
