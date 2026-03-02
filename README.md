@@ -4,8 +4,9 @@ Bu proje, yerel olarak çalışan (Local RAG) yapay zeka destekli bir doküman a
 
 Arayüz **Gradio**, vektör veritabanı **ChromaDB**, embedding modeli **FastEmbed (BAAI/bge)** ve OCR motoru **Tesseract** üzerine kuruludur.
 
-<video src="Doğal Dil Tabanlı Doküman Analiz Sistemi.mp4" width="100%" controls></video>
+[![YouTube'da İzle](https://img.shields.io/badge/YouTube-Videoyu_İzle-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=gpgWwUZe2bg)
 
+![Demo](assets/demo.gif)
 
 ## ⭐ Öne Çıkan Özellikler
 
