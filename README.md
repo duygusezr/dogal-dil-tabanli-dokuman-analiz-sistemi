@@ -4,6 +4,9 @@ Bu proje, yerel olarak çalışan (Local RAG) yapay zeka destekli bir doküman a
 
 Arayüz **Gradio**, vektör veritabanı **ChromaDB**, embedding modeli **FastEmbed (BAAI/bge)** ve OCR motoru **Tesseract** üzerine kuruludur.
 
+<video src="Doğal Dil Tabanlı Doküman Analiz Sistemi.mp4" width="100%" controls></video>
+
+
 ## ⭐ Öne Çıkan Özellikler
 
 - **📄 Gelişmiş PDF İşleme:** Metin içeren PDF'lerin yanı sıra, taranmış (resim formatındaki) PDF'leri de **OCR (Tesseract)** ile okuyabilir.
